@@ -1,0 +1,74 @@
+一、goroutine的启动
+    将要并发执行的任务包装成一个函数，调用函数的时候前面加go关键字，就能开启一个goroutine去执行该函数的任务
+
+    程序启动以后会创建goroutine去执行main函数
+
+    main函数结束后，由main启动的goroutine也都结束
+
+    goroutine对应的函数结束了，goroutine结束了
+
+
+二、goroutine的本质
+    goroutine的调度模型：GMP  
+
+    m:n---把m个线程跑在n个操作系统线程
+
+
+三、goroutine与操作系统线程的区别
+    goroutine是用户态的线程，比内核态的线程更轻量级，初始只占2KB的栈空间
+
+    可以轻松开启数十万的goroutine也不会蹦
+
+
+四、runtime.GOMAXPROCS
+    默认是操作系统的逻辑核心数，默认跑满CPU
+
+    通过runtime.GOMAXPROCS(para int)限制
+
+
+五、sync.WaitGroup
+    var wg sync.WaitGroup
+    
+    wg.Add(para int) 计数器+para
+
+    wg.Done() 计数器-1
+
+    wg.Wait() 等待
+
+
+六、为什么需要channel？
+    通过channel实现多个goroutine的之间的通信
+
+    csp：通过通信来共享内存
+
+    channel是一种类型，引用类型，make初始化后才可以使用
+
+    channel的声明：
+        var ch chan 元素类型
+
+    channel的初始化：
+        ch=make(chan 元素类型，[缓冲区大小])
+
+    channel的操作：
+        发送：ch<-10
+        接收：x:=<-ch
+        关闭：close(ch)
+    
+    带缓冲区的通道和无缓冲区的通道：
+
+    	for {
+		    x, ok := <-ch1  
+		    if !ok {    // 什么时候ok=false? ch1被关闭的时候
+		    	break
+		    }
+		    ch2 <- x * x
+	    }
+
+    channel关闭后再关闭会panic
+
+
+七、select
+    select用来提高代码的可读性
+    用于处理一个或多个channel的发送、接收操作
+    如果多个case同时满足，select会随机选择一个
+    对于没有case的select()会一直等待，可用于阻塞main函数
