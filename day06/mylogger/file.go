@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+var (
+	// MaxSize ... 日志缓冲区大
+	MaxSize = 50000
+)
+
 // FileLogger ...
 type FileLogger struct {
 	Level       LogLevel
@@ -39,7 +44,7 @@ func NewFileLogger(levelStr, fp, fn string, maxSize int64) *FileLogger {
 		filePath:    fp,
 		fileName:    fn,
 		maxFileSize: maxSize,
-		logChan:     make(chan *LogMsg, 50000),
+		logChan:     make(chan *LogMsg, MaxSize),
 	}
 	err = fl.initFile() //按照文件名和文件路径将文件打开
 	if err != nil {
@@ -65,9 +70,10 @@ func (f *FileLogger) initFile() error {
 	f.fileObj = fileObj
 	f.errFileObj = errFileObj
 	// 开启一个后台goroutine去往文件写日志
-	for i := 1; i < 5; i++ {
-		go f.writeLogBackground()
-	}
+	// for i := 1; i < 5; i++ {
+	// 	go f.writeLogBackground()
+	// }
+	go f.writeLogBackground()
 	return nil
 }
 
@@ -116,7 +122,7 @@ func (f *FileLogger) writeLogBackground() {
 
 	for {
 		if f.checkLogSize(f.fileObj) {
-			newFile, err := f.splitFile(f.fileObj)
+			newFile, err := f.splitFile(f.fileObj) // 日志文件
 			if err != nil {
 				return
 			}
@@ -124,6 +130,7 @@ func (f *FileLogger) writeLogBackground() {
 		}
 		select {
 		case logTmp := <-f.logChan:
+			// 把日志拼出来
 			logInfo := fmt.Sprintf("[%s] [%s] [%s-%s-%d] %s\n", logTmp.timestamp, logString(logTmp.level), logTmp.funcName, logTmp.fileName, logTmp.line, logTmp.msg)
 			fmt.Fprintf(f.fileObj, logInfo)
 			if logTmp.level >= ERROR {
