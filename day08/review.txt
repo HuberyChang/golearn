@@ -1,0 +1,71 @@
+内容回顾
+
+互斥锁
+    sync.Mutex是一个结构体，是值类型，给函数传递参数要传指针
+
+
+
+两个方法
+    var lock sync.Mutex
+    lock.Lock() // 加锁
+    lock.Unlock() // 解锁
+
+
+
+为什么要用锁？
+    防止同一时刻多个goroutine操作同一个资源。
+
+
+
+读写互斥锁
+    应用场景：
+        适用于读多写少。
+        1、读的goroutine来了获取的是读锁，后续的goroutine能读不能写
+        2、写的goroutine来了获取的是写锁，后续的goroutine不管是读写都要等待获取锁
+    使用：
+        var rwLock sync.RWMutex
+        rwLock.RLock() // 增加读锁
+        rwLock.RUnlock() // 释放读写
+
+        rwLock.Lock() // 增加写锁
+        rwLock.Unlock() // 释放写锁
+
+
+
+等待组
+    sync.Waitgroup
+    用来等goroutine执行完再继续
+    是一个结构体，是值类型，给函数传递参数的时候要传指针
+
+    使用：
+        var wg sync.Waitgroup
+        wg.Add(n) // 起几个goroutine就加几个计数
+        wg.Done() // 在goroutine对应的函数中，函数要结束的时候表示goroutine完成，计数器减1
+        wg.Wait() // 等待所有goroutine都结束
+
+
+
+sync.Once
+    使用场景：
+        某些场景某些函数只需要执行一次。
+        var once sync.Once
+        once.Do() // 接收一个没有参数也没有返回值的函数。
+
+    sync.Map
+    使用场景：
+        并发操作一个map的时候，内置的map不是并发安全的。
+    使用：
+        是一个开箱即用的并发安全map
+        // Map[key]=value ---- 原生map
+        var syncmap sync.Map
+        syncmap.Store(key,value)
+        syncmap.Load(key)
+        syncmap.LoadOrStore()
+        syncmap.Delete()
+        syncmap.Range()
+
+
+原子操作
+    go内置了一些针对内置的基本数据类型的一些并发安全的操作
+    var i int64=10
+    atmotic.AddInt64(&i,1)
