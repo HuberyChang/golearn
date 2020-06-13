@@ -38,6 +38,7 @@ type user struct {
 	id   int
 }
 
+// 查询单条
 func queryOne(id int) {
 	var u1 user
 	// 1、单条查询
@@ -51,8 +52,103 @@ func queryOne(id int) {
 	fmt.Printf("u1:%#v\n", u1)
 }
 
-func insert() {
+// 查询多行
+func queryMore(n int) {
+	// 1. sql语句
+	sqlStr := `select id,name,age from user where id>?;`
+	rows, err := db.Query(sqlStr, n)
+	if err != nil {
+		fmt.Printf("exec %s query failed, err:%#v\n", sqlStr, err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var u1 user
+		err := rows.Scan(&u1.id, &u1.name, &u1.age)
+		if err != nil {
+			fmt.Printf("scan failed,err:%v\n", err)
+		}
+		fmt.Printf("u1:%#v\n", u1)
+	}
+}
 
+// 插入数据
+func insert() {
+	// 1. 写sql语句
+	sqlStr := `insert into user(name,age) values("发丝",79)`
+	ret, err := db.Exec(sqlStr)
+	if err != nil {
+		fmt.Printf("insert failed:%v\n", err)
+		return
+	}
+	// 如果是插入数据的操作，能够拿到插入数据的ID
+	id, err := ret.LastInsertId()
+	if err != nil {
+		fmt.Printf("get last id failed:%v\n", err)
+		return
+	}
+	fmt.Printf("id:%v\n", id)
+}
+
+// 更新操作
+func updateRow(newAge, id int) {
+	sqlStr := `update user set age=? where id=?;`
+	ret, err := db.Exec(sqlStr, newAge, id)
+	if err != nil {
+		fmt.Printf("update failed:%v\n", err)
+		return
+	}
+	n, err := ret.RowsAffected()
+	if err != nil {
+		fmt.Printf("get rows failed:%v\n", err)
+		return
+	}
+	fmt.Printf("n:%v\n", n)
+}
+
+func deleteRow(n int) {
+	sqlStr := `delete from user where id=?;`
+	ret, err := db.Exec(sqlStr, n)
+	if err != nil {
+		fmt.Printf("delete failed:%v\n", err)
+		return
+	}
+	rowNum, err := ret.RowsAffected()
+	if err != nil {
+		fmt.Printf("get row failed:%v\n", err)
+		return
+	}
+	fmt.Printf("delete:%v\n", rowNum)
+}
+
+func prepareInsert() {
+	sqlStr := `insert into user(name,age) values(?,?);`
+	stmt, err := db.Prepare(sqlStr)
+	if err != nil {
+		fmt.Printf("prepare failed,err:%v\n", err)
+		return
+	}
+	defer stmt.Close()
+	var m = map[string]int{
+		"罚款":  789,
+		"阿斯顿": 8,
+		"爱上了": 89,
+		"阿萨德": 39,
+	}
+	for k, v := range m {
+		stmt.Exec(k, v)
+		// ret, err := stmt.Exec(k, v)
+		// if err != nil {
+		// 	fmt.Printf("失败：%v\n", err)
+		// 	return
+		// }
+		// rowNum, err := ret.RowsAffected()
+		// if err != nil {
+		// 	fmt.Printf("failed:%v\n", err)
+		// 	return
+		// }
+		// fmt.Printf("insert:%v\n", rowNum)
+	}
 }
 
 func main() {
@@ -61,5 +157,10 @@ func main() {
 		fmt.Printf("init db failed: %v\n", err)
 	}
 	fmt.Println("数据库连接成功！")
-	queryOne(1)
+	// queryOne(1)
+	// queryMore(1)
+	// insert()
+	// updateRow(68, 2)
+	// deleteRow(1)
+	prepareInsert()
 }
