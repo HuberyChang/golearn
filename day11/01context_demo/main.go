@@ -5,23 +5,25 @@ import (
 	"sync"
 	"time"
 )
+
 // 为什么要用context
 var wg sync.WaitGroup
-// var notify bool
-var exitChan=make(chan bool,1)
 
-func f()  {
+// var notify bool
+var exitChan = make(chan bool, 1)
+
+func f() {
 	defer wg.Done()
 FORLOOP:
 	for {
 		fmt.Println("fjal")
-		time.Sleep(time.Millisecond*500)
+		time.Sleep(time.Millisecond * 500)
 		// if notify{
 		// 	break
 		// }
 
-		select{
-		case<-exitChan:
+		select {
+		case <-exitChan:
 			break FORLOOP
 		default:
 		}
@@ -29,11 +31,11 @@ FORLOOP:
 }
 
 func main() {
-	wg.Add(1)	
+	wg.Add(1)
 	go f()
-	time.Sleep(time.Second*5)
+	time.Sleep(time.Second * 5)
 	// 通知子goroutine退出
-	exitChan<-true
+	exitChan <- true
 	// notify=true
 	wg.Wait()
 }
