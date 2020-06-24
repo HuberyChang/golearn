@@ -1,0 +1,12 @@
+context
+    goroutine管理
+    context.Context
+    两个根节点：context.Background()、context.TODU()
+    四个方法：context.WithCancel()、context.WithTimeout()、context.WithDeadline()、context.WithValue()
+
+日志收集
+    为什么要自己写?
+    ELK部署麻烦，需要为每一个filebeat配置一个配置文件
+    使用etcd来管理被收集的日志项。
+
+项目架构
