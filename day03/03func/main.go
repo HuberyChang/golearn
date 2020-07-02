@@ -23,9 +23,16 @@ func f4(x, y int) int {
 	return x + y
 }
 
-//可变参数
-func f5(x string, y ...int) int {
-	fmt.Println(y) //y是一个int类型的切片
+/*
+语法：
+	参数名 ...参数类型
+	对于函数，可变参数相当于一个切片。调用函数时，可传入0-多个参数
+注意事项：
+	1.可变参数放在所有参数最后
+	2.最多只能一个可变参数
+*/
+func f5(x string, y ...int) int { //y是一个int类型的切片
+	fmt.Printf("%T\n", y) // []int
 	return 1
 }
 
@@ -42,7 +49,6 @@ func f7(x, y int) (sum, sub int) {
 	return
 }
 
-
 func main() {
 	f1()
 	f2("h789")
@@ -52,6 +58,6 @@ func main() {
 
 	f5("hfajkl", 1, 2, 3, 4)
 	// func f8()  {//不能在命名函数中再声明命名函数
-		
+
 	// }
-	}
+}

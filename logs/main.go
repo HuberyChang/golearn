@@ -76,15 +76,7 @@ func main() {
 	}
 	//3.收集日志发往kafka
 	//3.1 循环每一个日志，创建tailObj
-	for _, logEntry := range logEntryConf {
-		// conf: *etcd.LogEntry
-		err = taillog.Init(logEntry.Path)
-		if err != nil {
-			fmt.Printf("Init taillog failed,err:%v\n", err)
-			return
-		}
-	}
-	//3.2 发往kafka
+	taillog.Init(logEntryConf)
 
 	//2.打开日志文件准备收集日志
 	/* 注释1 */

@@ -2,6 +2,7 @@ package taillog
 
 import (
 	"fmt"
+	"golearn/logs/kafka"
 
 	"github.com/hpcloud/tail"
 )
@@ -11,7 +12,23 @@ var (
 	LogChan chan string
 )
 
-func Init(fileName string) (err error) {
+// TailTask : 一个日志收集的任务
+type TailTask struct {
+	path     string
+	topic    string
+	instance *tail.Tail
+}
+
+func NewTailTask(path, topic string) (tailObj *TailTask) {
+	tailObj = &TailTask{
+		path:  path,
+		topic: topic,
+	}
+	tailObj.init() // 根据路径去打开对应的日志
+	return
+}
+
+func (t *TailTask) init() {
 	config := tail.Config{
 		ReOpen:    true,                                 // 重新打开
 		Follow:    true,                                 // 是否跟随
@@ -19,15 +36,21 @@ func Init(fileName string) (err error) {
 		MustExist: false,                                // 必须存在，不在就报错
 		Poll:      true,
 	}
-	tailObj, err = tail.TailFile(fileName, config)
+	var err error
+	t.instance, err = tail.TailFile(t.path, config)
 	if err != nil {
 		fmt.Println("tail file failed ,err:", err)
-		return
+
 	}
-	return
+	go t.run() // 直接采集日志发送到kafka
 }
 
-// ReadChan 读日志
-func ReadChan() <-chan *tail.Line {
-	return tailObj.Lines
+func (t *TailTask) run() {
+	for {
+		select {
+		case line := <-t.instance.Lines:
+			// 先把日志信息发送到一个通道中
+			kafka.SendToKafka(t.topic, line.Text) // 函数调用函数
+		}
+	}
 }
