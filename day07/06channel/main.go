@@ -10,15 +10,21 @@ var wg sync.WaitGroup
 
 func noBufChan() {
 	fmt.Println(b)
+	//创建通道
 	b = make(chan int)
 	wg.Add(1)
+
+	//启动一个子goroutine
 	go func() {
 		defer wg.Done()
 		x := <-b
 		fmt.Println("取到了x的值。。。", x)
 	}()
+
+	//向通道写数据
 	b <- 10
 	fmt.Println("发送到chan中。。。")
+
 	wg.Wait()
 }
 
@@ -34,7 +40,14 @@ func haveBufChan() {
 	close(b)
 }
 
+func test(ch chan int) {
+	fmt.Printf("%T,%v\n", ch, ch)
+}
+
 func main() {
 	// noBufChan()
 	haveBufChan()
+	var a = make(chan int)
+	fmt.Println(a) //0xc000086060
+	test(a)        //chan int,0xc000086060
 }

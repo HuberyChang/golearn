@@ -36,6 +36,28 @@ func (i myInt) hello() {
 	fmt.Println("int")
 }
 
+type Person struct {
+	name string
+	age  int
+}
+
+type Student struct {
+	Person // 匿名字段
+	school string
+}
+
+func (p Person) eat() {
+	fmt.Println("父类")
+}
+
+func (s Student) eat() {
+	fmt.Println("子类")
+}
+
+func (s Student) study() {
+	fmt.Println("学习")
+}
+
 func main() {
 	m := myInt(100)
 	m.hello()
@@ -54,4 +76,12 @@ func main() {
 	w2.printInfo()
 	c1 := Cat{color: "black", age: 9}
 	c1.printInfo()
+
+	p1 := Person{name: "安居房", age: 19}
+	p1.eat()
+
+	s1 := Student{Person{"安抚", 79}, "发链接"}
+	s1.eat()
+	s1.study()
+	s1.eat()
 }
